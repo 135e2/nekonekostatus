@@ -37,6 +37,9 @@ func GetStat() (map[string]interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
+	MEM.Used = MEM.Total - MEM.Available // Dirty hack for LXC Containers
+	SWAP.Total = MEM.SwapTotal
+	SWAP.Used = MEM.SwapTotal - MEM.SwapFree
 	res["mem"] = gin.H{
 		"virtual": MEM,
 		"swap":    SWAP,
