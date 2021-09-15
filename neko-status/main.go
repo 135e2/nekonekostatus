@@ -42,8 +42,8 @@ func main() {
 		}
 		// fmt.Println(Config)
 	}
-	if show_version != false {
-		fmt.Println("neko-status v1.0")
+	if show_version {
+		fmt.Println("neko-status v1.1-fix by nekoneko & 135e2")
 		return
 	}
 
