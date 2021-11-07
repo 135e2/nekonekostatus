@@ -55,10 +55,10 @@ async function update(server){
     var {sid}=server;
     if(updating.has(sid))return;
     updating.add(sid);
-    if(server.status<=0){
-        delete stats[sid];
-        updating.delete(sid);
-        return;
+//    if(server.status<=0){
+//        delete stats[sid];
+//        updating.delete(sid);
+//        return;
     }
     var stat=await getStat(server);
     if(stat){
