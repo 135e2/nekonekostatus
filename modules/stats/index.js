@@ -56,10 +56,10 @@ async function getStat(server){
 }
 async function update(server){
     let {sid}=server;
-    if(server.status<=0){
-        delete stats[sid];
-        return;
-    }
+    //if(server.status<=0){
+    //    delete stats[sid];
+    //    return;
+    //}
     let stat=await getStat(server);
     if(stat){
         let notice=false;
