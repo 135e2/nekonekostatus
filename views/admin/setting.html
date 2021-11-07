@@ -19,7 +19,7 @@
                 <input class="mdui-textfield-input" type="password" value="{{setting.password}}" key="password">
             </div>
         </div>
-        <div class="mdui-row mdui-row-md-2">
+        <div class="mdui-row mdui-row-md-3">
             <div class="mdui-col mdui-textfield">
                 <label class="mdui-textfield-label">站点名称</label>
                 <input class="mdui-textfield-input" type="text" value="{{setting.site.name}}" key="site.name">
@@ -28,6 +28,13 @@
                 <label class="mdui-textfield-label">站点网址</label>
                 <input class="mdui-textfield-input" type="text" value="{{setting.site.url}}" key="site.url">
             </div>
+            <div class="mdui-textfield">
+                <label class="mdui-textfield-label">默认主题</label>
+                <select class="mdui-select" key="theme">
+                    <option value="card" {%if setting.theme == "card"%}selected{%endif%}>卡片</option>
+                    <option value="list" {%if setting.theme == "list"%}selected{%endif%}>列表</option>
+                </select>
+            </div>
         </div>
         <div class="mdui-row">
             <div class="mdui-col mdui-textfield">
@@ -35,16 +42,23 @@
                 <input class="mdui-textfield-input" type="text" value="{{setting.neko_status_url}}" key="neko_status_url">
             </div>
         </div>
-        <div class="mdui-row mdui-row-md-2">
+        <div class="mdui-row mdui-row-md-3">
             <div class="mdui-col mdui-textfield">
                 <label class="mdui-textfield-label">telegram通知 bot token</label>
                 <input class="mdui-textfield-input" type="text" value="{{setting.bot.token}}" key="bot.token">
             </div>
             <div class="mdui-col mdui-textfield">
                 <label class="mdui-textfield-label">通知chat id列表(用,分割)</label>
-                <input class="mdui-textfield-input" type="text" value="{{setting.bot.chatIds}}" key="bot.chatIds">
+                <input class="mdui-textfield-input" type="text" value="{{setting.bot.chatIds}}" key="bot.chatIds" isarray=1>
             </div>
-        </div>
+            <div class="mdui-col mdui-textfield">
+                <label class="mdui-textfield-label">使用webhook</label>
+                <label class="mdui-switch">
+                    <input type="checkbox" {%if setting.bot.webhook%}checked{%endif%} key="bot.webhook">
+                    <i class="mdui-switch-icon"></i>
+                </label>
+            </div>
+        </div>        
         <label class="mdui-checkbox">
             <input type="checkbox" type="text" {%if setting.debug%}checked{%endif%} key="debug">
             <i class="mdui-checkbox-icon"></i>调试
@@ -67,8 +81,8 @@ async function edit(){
         var key=keys[0];
         keys.shift();
         if(keys.length==0)x[key]=val;
-        else{            
-            if(!x[key])x[key]={};            
+        else{
+            if(!x[key])x[key]={};
             gen(x[key],keys,val)
         };
     }
@@ -76,6 +90,7 @@ async function edit(){
         var val=x.value;
         if(x.type=="number")val=Number(x.value);
         if(x.type=="checkbox")val=x.checked;
+        if(x.getAttribute("isarray"))val=val.split(",");
         gen(setting,x.getAttribute("key").split('.'),val);
     }
     console.log(setting);

@@ -2,27 +2,63 @@
 
 一个Material Design风格的服务器探针
 
+- 默认访问端口: 5555
 - 默认密码: `nekonekostatus`
-- 默认端口: 5555
 - 默认被控下载地址: https://github.com/nkeonkeo/nekonekostatus/releases/download/v0.1/neko-status
 
 安装后务必修改密码！
 
+注意: 正处于快速开发迭代期，可能不保证无缝更新
+
+Feature:
+
+- 面板一键安装被控
+- 负载监控、带宽监控、流量统计图表
+- Telegram 掉线/恢复 通知
+- 好看的主题 (卡片/列表、夜间模式)
+- WEBSSH、脚本片段
+
+TODOLIST:
+
+- 主动通知模式
+- 硬盘监控
+- WEBSSH的一些小问题
+
+## 一键脚本安装
+
+在centos7/debian 10下测试成功，其他系统请自行尝试，参照[手动安装](#手动安装)
+
+wget:
+
+```bash
+wget https://raw.githubusercontent.com/nkeonkeo/nekonekostatus/main/install.sh -O install.sh && bash install.sh
+```
+
+curl:
+
+```bash
+curl https://raw.githubusercontent.com/nkeonkeo/nekonekostatus/main/install.sh -o install.sh && bash install.sh
+```
+
+## 更新
+
+记得备份数据库 (`database/db.db`)
+
+```bash
+cd /root/nekonekostatus
+git pull
+systemctl restart nekonekostatus-dashboard
+```
+
 ## Docker
+
+(暂未更新到新版本)
 
 ```bash
 docker run --restart=on-failure --name nekonekostatus -p 5555:5555 -d nkeonkeo/nekonekostatus:v1.0
 ```
 
 访问目标ip 5555端口即可,`5555:5555`可改成任意其他端口，如`2333:5555`
-
-## 一键脚本
-
-请先安装`wget`
-
-```bash
-wget https://github.com/nkeonkeo/nekonekostatus/raw/main/install.sh && bash install.sh
-```
 
 ## 手动安装
 
@@ -31,20 +67,25 @@ wget https://github.com/nkeonkeo/nekonekostatus/raw/main/install.sh && bash inst
 centos: 
 
 ```bash
-yum install epel-release centos-release-scl -y
-yum install nodejs devtoolset-8-gcc* git -y
-scl enable devtoolset-8 bash
-npm install n -g
-n latest
+yum install epel-release -y && yum install centos-release-scl git -y && yum install nodejs devtoolset-8-gcc* -y
+bash -c "npm install n -g"
+source /root/.bashrc
+bash -c "n latest"
+source /root/.bashrc
+bash -c "npm install npm@latest -g"
+source /root/.bashrc
 ```
 
 debian/ubuntu:
 
-```
-apt-get install nodejs npm git -y
-npm install n -g
-scl enable devtoolset-8 bash
-n latest
+```bash
+apt update -y && apt-get install nodejs npm git build-essential -y
+bash -c "npm install n -g"
+source /root/.bashrc
+bash -c "n latest"
+source /root/.bashrc
+bash -c "npm install npm@latest -g"
+source /root/.bashrc
 ```
 
 ---
@@ -54,16 +95,34 @@ n latest
 ```bash
 git clone https://github.com/nkeonkeo/nekonekostatus.git
 cd nekonekostatus
+source /opt/rh/devtoolset-8/enable
 npm install
 ```
 
 ## 配置 & 运行
 
-复制`config.js.example`到`config.js`,并根据注释编辑配置
-
 `node nekonekostatus.js` 即可运行
 
-后台常驻, 请先安装`forever`(`npm install forever -g`),然后: `forever start nekonekostatus.js`
+后台常驻:
+
+1. 安装`forever`(`npm install forever -g`),然后: `forever start nekonekostatus.js`
+   
+2. 使用systemd
+   
+```bash
+echo "[Unit]
+Description=nekonekostatus
+
+[Service]
+Type=simple
+ExecStart=/root/nekonekostatus/nekonekostatus.js
+
+[Install]
+WantedBy=multi-user.target" > /etc/systemd/system/nekonekostatus-dashboard.service
+systemctl daemon-reload
+systemctl enable nekonekostatus-dashboard.service
+systemctl start nekonekostatus-dashboard.service
+```
 
 https请使用nginx等反代
 

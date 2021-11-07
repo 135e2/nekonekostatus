@@ -7,7 +7,7 @@ const express=require('express'),
     fs=require("fs"),
     schedule=require("node-schedule");
 const core=require("./core"),
-    db=require("./database")({cache:true}),
+    db=require("./database")(),
     {pr,md5,uuid}=core;
 var setting=db.setting.all();
 var svr=express();
@@ -16,13 +16,13 @@ svr.use(bp.urlencoded({extended: false}));
 svr.use(bp.json({limit:'100mb'}));
 svr.use(ckp());
 svr.use(express.json());
-svr.use(express.static("./static"));
+svr.use(express.static(__dirname+"/static"));
 
 svr.engine('html', nunjucks.render);
 svr.set('view engine', 'html');
 require('express-ws')(svr);
 
-var env=nunjucks.configure('views', {
+var env=nunjucks.configure(__dirname+'/views', {
     autoescape: true,
     express: svr,
     watch:setting.debug,
@@ -60,10 +60,30 @@ svr.get('/logout',(req,res)=>{
 svr.all('/admin*',(req,res,nxt)=>{
     if(req.admin)nxt();
     else res.redirect('/login');
-})
+});
+svr.get('/admin/db',(req,res)=>{
+    var path=__dirname+"/database/backup.db";
+    db.DB.backup(path).then(()=>{res.sendFile(path)});
+});
+
+var bot=null;
+if(setting.bot&&setting.bot.token){
+    bot=require("./bot")(setting.bot.token,setting.bot.chatIds);
+    if(setting.bot.webhook){
+        bot.bot.setWebHook(setting.site.url+"/bot"+setting.bot.token).then(()=>{
+            bot.bot.setMyCommands(bot.cmds);
+        });
+        svr.all('/bot'+setting.bot.token, (req,res)=>{
+            bot.bot.processUpdate(req.body);
+            res.sendStatus(200);
+        });
+    }
+    else bot.bot.startPolling();
+}
 svr.locals={
     setting,
     db,
+    bot,
     ...core,
 };
 
