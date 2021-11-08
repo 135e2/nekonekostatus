@@ -17,10 +17,6 @@
                 <label class="mdui-textfield-label">name</label>
                 <input class="mdui-textfield-input" type="text" id='add_name'>
             </div>
-            <div class="mdui-col-xs-2 mdui-textfield">
-                <label class="mdui-textfield-label">TOP</label>
-                <input class="mdui-textfield-input" type="number" id='add_top' value=1>
-            </div>
         </div>
 
         <br>
@@ -70,7 +66,7 @@
             </div>
             <div class="mdui-col mdui-textfield" id="add_api_port_input">
                 <label class="mdui-textfield-label">被动通讯端口</label>
-                <input class="mdui-textfield-input" type="number" id='add_api_port' placeholder=9999>
+                <input class="mdui-textfield-input" type="number" id='add_api_port' value="9999">
             </div>
         </div>
     </div>
@@ -86,8 +82,7 @@
 <script>
 async function add(){
     var sid=V('add_sid'),
-        name=V('add_name'),
-        top=Number(V('add_top'));
+        name=V('add_name');
     startloading();
     var data={
         ssh:{
@@ -104,7 +99,7 @@ async function add(){
         },
         device:V('add_device')
     };
-    var res=await postjson(`/admin/servers/add`,{sid,name,top,data});
+    var res=await postjson(`/admin/servers/add`,{sid,name,data});
     endloading();
     notice(res.data);
     if(res.status)redirect(`/admin/servers/${res.data}/`);
