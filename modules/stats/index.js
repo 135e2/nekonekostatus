@@ -59,7 +59,7 @@ async function update(server){
 //        delete stats[sid];
 //        updating.delete(sid);
 //        return;
-    }
+//    }
     var stat=await getStat(server);
     if(stat){
         if(sid in stats&&stats[sid].stat==false){
