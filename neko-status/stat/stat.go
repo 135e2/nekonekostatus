@@ -1,7 +1,9 @@
 package stat
 
 import (
+	"fmt"
 	"neko-status/walled"
+	"os/exec"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -40,6 +42,18 @@ func GetStat() (map[string]interface{}, error) {
 	SWAP, err := mem.SwapMemory()
 	if err != nil {
 		return nil, err
+	}
+
+	vmType, err := exec.Command("systemd-detect-virt", "--vm").Output()
+	if err != nil {
+		fmt.Println("[WARN] systemd-detect-virt not found, skipping LXC hack now.")
+	}
+	strVmType := string(vmType)
+
+	if strVmType == "lxc" || strVmType == "lxc-libvirt" {
+		MEM.Used = MEM.Total - MEM.Available // Dirty hack for LXC Containers
+		SWAP.Total = MEM.SwapTotal
+		SWAP.Used = MEM.SwapTotal - MEM.SwapFree
 	}
 	res["mem"] = gin.H{
 		"virtual": MEM,
